@@ -46,6 +46,10 @@ function App() {
   }
 
   const handleInputChange = (value, converter) => {
+    if (value === '' || value === null) {
+      // Allow clearing the input
+      return
+    }
     const numValue = parseFloat(value)
     if (!isNaN(numValue) && numValue > 0) {
       setEuSize(converter(numValue))
@@ -59,8 +63,11 @@ function App() {
           <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-800 mb-4">
             Shoe Size Converter
           </h1>
-          <p className="text-center text-gray-600 mb-8">
+          <p className="text-center text-gray-600 mb-2">
             Convert shoe sizes between different country standards
+          </p>
+          <p className="text-center text-sm text-gray-500 mb-8">
+            (Men's sizes)
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
