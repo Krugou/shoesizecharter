@@ -52,8 +52,8 @@ function App() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   // Conversion formulas based on standard shoe size charts
-  const euToUS = (eu) => Math.round((eu - 33) * 10) / 10
-  const euToUK = (eu) => Math.round((eu - 33.5) * 10) / 10
+  const euToUS = (eu) => Math.round((eu * 0.8125 - 25.625) * 10) / 10
+  const euToUK = (eu) => Math.round((eu * 0.8125 - 26.125) * 10) / 10
   const euToCM = (eu) => Math.round(((eu / 1.5) - 1.5) * 10) / 10
   const euToInches = (eu) => {
     const cm = euToCM(eu)
@@ -61,8 +61,8 @@ function App() {
   }
 
   // Reverse conversions to EU
-  const usToEU = (us) => Math.round((parseFloat(us) + 33) * 10) / 10
-  const ukToEU = (uk) => Math.round((parseFloat(uk) + 33.5) * 10) / 10
+  const usToEU = (us) => Math.round(((parseFloat(us) + 25.625) / 0.8125) * 10) / 10
+  const ukToEU = (uk) => Math.round(((parseFloat(uk) + 26.125) / 0.8125) * 10) / 10
   const cmToEU = (cm) => Math.round(((parseFloat(cm) + 1.5) * 1.5) * 10) / 10
   const inchesToEU = (inches) => {
     const cm = parseFloat(inches) * 2.54
