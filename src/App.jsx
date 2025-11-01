@@ -1,161 +1,285 @@
 import { useState } from 'react'
+import { 
+  Box, 
+  Container, 
+  Typography, 
+  Paper, 
+  Slider,
+  TextField,
+  Grid,
+  Card,
+  CardContent,
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
+  useMediaQuery,
+  Chip,
+  Stack
+} from '@mui/material'
+import { 
+  Straighten as StraightenIcon,
+  Info as InfoIcon 
+} from '@mui/icons-material'
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+    background: {
+      default: '#f5f5f5',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h3: {
+      fontWeight: 700,
+    },
+    h6: {
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+})
 
 function App() {
-  const [euSize, setEuSize] = useState(50)
+  const [euSize, setEuSize] = useState(42)
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   // Conversion formulas based on standard shoe size charts
-  // EU to other sizes (approximate conversions)
-  const euToUS = (eu) => {
-    // Men's conversion: US = EU - 33
-    return Math.round((eu - 33) * 10) / 10
-  }
-
-  const euToUK = (eu) => {
-    // UK = EU - 33.5
-    return Math.round((eu - 33.5) * 10) / 10
-  }
-
-  const euToCM = (eu) => {
-    // EU size formula: EU = (foot length in cm + 1.5) * 1.5
-    // Solving for foot length: foot length = (EU / 1.5) - 1.5
-    return Math.round(((eu / 1.5) - 1.5) * 10) / 10
-  }
-
+  const euToUS = (eu) => Math.round((eu - 33) * 10) / 10
+  const euToUK = (eu) => Math.round((eu - 33.5) * 10) / 10
+  const euToCM = (eu) => Math.round(((eu / 1.5) - 1.5) * 10) / 10
   const euToInches = (eu) => {
     const cm = euToCM(eu)
-    // 1 inch = 2.54 cm
     return Math.round((cm / 2.54) * 100) / 100
   }
 
   // Reverse conversions to EU
-  const usToEU = (us) => {
-    return Math.round((parseFloat(us) + 33) * 10) / 10
-  }
-
-  const ukToEU = (uk) => {
-    return Math.round((parseFloat(uk) + 33.5) * 10) / 10
-  }
-
-  const cmToEU = (cm) => {
-    return Math.round(((parseFloat(cm) + 1.5) * 1.5) * 10) / 10
-  }
-
+  const usToEU = (us) => Math.round((parseFloat(us) + 33) * 10) / 10
+  const ukToEU = (uk) => Math.round((parseFloat(uk) + 33.5) * 10) / 10
+  const cmToEU = (cm) => Math.round(((parseFloat(cm) + 1.5) * 1.5) * 10) / 10
   const inchesToEU = (inches) => {
     const cm = parseFloat(inches) * 2.54
     return cmToEU(cm)
   }
 
   const handleInputChange = (value, converter) => {
-    if (value === '' || value === null) {
-      // Allow clearing the input
-      return
-    }
+    if (value === '' || value === null) return
     const numValue = parseFloat(value)
     if (!isNaN(numValue) && numValue > 0) {
       setEuSize(converter(numValue))
     }
   }
 
+  const sizeData = [
+    { label: 'EU', value: euSize, converter: (val) => setEuSize(parseFloat(val) || 0), color: '#1976d2', step: 0.5 },
+    { label: 'US', value: euToUS(euSize), converter: (val) => handleInputChange(val, usToEU), color: '#9c27b0', step: 0.5 },
+    { label: 'UK', value: euToUK(euSize), converter: (val) => handleInputChange(val, ukToEU), color: '#2e7d32', step: 0.5 },
+    { label: 'CM', value: euToCM(euSize), converter: (val) => handleInputChange(val, cmToEU), color: '#ed6c02', step: 0.1 },
+    { label: 'Inches', value: euToInches(euSize), converter: (val) => handleInputChange(val, inchesToEU), color: '#d32f2f', step: 0.01 },
+  ]
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-800 mb-4">
-            Shoe Size Converter
-          </h1>
-          <p className="text-center text-gray-600 mb-2">
-            Convert shoe sizes between different country standards
-          </p>
-          <p className="text-center text-sm text-gray-500 mb-8">
-            (Men's sizes)
-          </p>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          py: { xs: 4, sm: 6, md: 8 },
+          px: { xs: 2, sm: 3 },
+        }}
+      >
+        <Container maxWidth="lg">
+          <Paper
+            elevation={8}
+            sx={{
+              p: { xs: 3, sm: 4, md: 6 },
+              background: 'rgba(255, 255, 255, 0.98)',
+              backdropFilter: 'blur(10px)',
+            }}
+          >
+            {/* Header */}
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="center"
+              spacing={2}
+              sx={{ mb: 2 }}
+            >
+              <StraightenIcon sx={{ fontSize: { xs: 36, sm: 48 }, color: 'primary.main' }} />
+              <Typography
+                variant={isMobile ? 'h4' : 'h3'}
+                component="h1"
+                color="primary"
+                align="center"
+              >
+                Shoe Size Converter
+              </Typography>
+            </Stack>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* EU Size */}
-            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-6 text-white transform transition hover:scale-105">
-              <label className="block text-sm font-semibold mb-2 uppercase tracking-wide">
-                EU Size
-              </label>
-              <input
-                type="number"
-                step="0.5"
-                value={euSize}
-                onChange={(e) => setEuSize(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 text-2xl font-bold text-gray-800 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300"
-              />
-            </div>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              align="center"
+              sx={{ mb: 1 }}
+            >
+              Convert shoe sizes between different country standards
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+              <Chip label="Men's sizes" size="small" color="primary" variant="outlined" />
+            </Box>
 
-            {/* US Size */}
-            <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-6 text-white transform transition hover:scale-105">
-              <label className="block text-sm font-semibold mb-2 uppercase tracking-wide">
-                US Size
-              </label>
-              <input
-                type="number"
-                step="0.5"
-                value={euToUS(euSize)}
-                onChange={(e) => handleInputChange(e.target.value, usToEU)}
-                className="w-full px-4 py-3 text-2xl font-bold text-gray-800 rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-300"
-              />
-            </div>
+            {/* Slider Section */}
+            <Paper
+              elevation={2}
+              sx={{
+                p: { xs: 3, sm: 4 },
+                mb: 4,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+              }}
+            >
+              <Typography variant="h6" gutterBottom align="center" sx={{ color: 'white' }}>
+                Select EU Size: {euSize}
+              </Typography>
+              <Box sx={{ px: { xs: 1, sm: 2 } }}>
+                <Slider
+                  value={euSize}
+                  onChange={(e, newValue) => setEuSize(newValue)}
+                  min={35}
+                  max={50}
+                  step={0.5}
+                  marks={[
+                    { value: 35, label: '35' },
+                    { value: 40, label: '40' },
+                    { value: 45, label: '45' },
+                    { value: 50, label: '50' },
+                  ]}
+                  valueLabelDisplay="auto"
+                  sx={{
+                    color: 'white',
+                    '& .MuiSlider-markLabel': {
+                      color: 'white',
+                    },
+                    '& .MuiSlider-thumb': {
+                      width: 24,
+                      height: 24,
+                      backgroundColor: 'white',
+                      '&:hover, &.Mui-focusVisible': {
+                        boxShadow: '0 0 0 8px rgba(255, 255, 255, 0.16)',
+                      },
+                    },
+                    '& .MuiSlider-track': {
+                      height: 8,
+                    },
+                    '& .MuiSlider-rail': {
+                      height: 8,
+                      opacity: 0.5,
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                    },
+                  }}
+                />
+              </Box>
+            </Paper>
 
-            {/* UK Size */}
-            <div className="bg-gradient-to-br from-green-500 to-teal-600 rounded-xl p-6 text-white transform transition hover:scale-105">
-              <label className="block text-sm font-semibold mb-2 uppercase tracking-wide">
-                UK Size
-              </label>
-              <input
-                type="number"
-                step="0.5"
-                value={euToUK(euSize)}
-                onChange={(e) => handleInputChange(e.target.value, ukToEU)}
-                className="w-full px-4 py-3 text-2xl font-bold text-gray-800 rounded-lg focus:outline-none focus:ring-4 focus:ring-green-300"
-              />
-            </div>
+            {/* Size Cards Grid */}
+            <Grid container spacing={{ xs: 2, sm: 3 }}>
+              {sizeData.map((size) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={size.label}>
+                  <Card
+                    elevation={4}
+                    sx={{
+                      height: '100%',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: 8,
+                      },
+                      background: `linear-gradient(135deg, ${size.color}20 0%, ${size.color}10 100%)`,
+                      borderTop: `4px solid ${size.color}`,
+                    }}
+                  >
+                    <CardContent>
+                      <Typography
+                        variant="h6"
+                        component="div"
+                        gutterBottom
+                        sx={{ color: size.color, fontWeight: 700 }}
+                      >
+                        {size.label} {size.label === 'CM' ? 'Size' : size.label === 'Inches' ? '' : 'Size'}
+                      </Typography>
+                      <TextField
+                        type="number"
+                        fullWidth
+                        value={size.value}
+                        onChange={(e) => size.converter(e.target.value)}
+                        inputProps={{
+                          step: size.step,
+                          style: { fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: 700 },
+                        }}
+                        variant="outlined"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                              borderColor: size.color,
+                              borderWidth: 2,
+                            },
+                            '&:hover fieldset': {
+                              borderColor: size.color,
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: size.color,
+                            },
+                          },
+                        }}
+                      />
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
 
-            {/* CM */}
-            <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-xl p-6 text-white transform transition hover:scale-105">
-              <label className="block text-sm font-semibold mb-2 uppercase tracking-wide">
-                Centimeters (CM)
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                value={euToCM(euSize)}
-                onChange={(e) => handleInputChange(e.target.value, cmToEU)}
-                className="w-full px-4 py-3 text-2xl font-bold text-gray-800 rounded-lg focus:outline-none focus:ring-4 focus:ring-orange-300"
-              />
-            </div>
-
-            {/* Inches */}
-            <div className="bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl p-6 text-white transform transition hover:scale-105">
-              <label className="block text-sm font-semibold mb-2 uppercase tracking-wide">
-                Inches
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={euToInches(euSize)}
-                onChange={(e) => handleInputChange(e.target.value, inchesToEU)}
-                className="w-full px-4 py-3 text-2xl font-bold text-gray-800 rounded-lg focus:outline-none focus:ring-4 focus:ring-yellow-300"
-              />
-            </div>
-          </div>
-
-          <div className="mt-8 p-6 bg-gray-50 rounded-xl">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
-              📝 How to use:
-            </h2>
-            <ul className="text-gray-600 space-y-1">
-              <li>• Enter a shoe size in any field to see conversions</li>
-              <li>• Default EU size is set to 50</li>
-              <li>• All conversions update automatically</li>
-              <li>• Values are approximate and may vary by manufacturer</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
+            {/* Info Section */}
+            <Paper
+              elevation={2}
+              sx={{
+                mt: 4,
+                p: { xs: 2, sm: 3 },
+                backgroundColor: '#f5f5f5',
+              }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                <InfoIcon color="primary" />
+                <Typography variant="h6" color="primary">
+                  How to Use
+                </Typography>
+              </Stack>
+              <Stack spacing={1}>
+                <Typography variant="body2" color="text.secondary">
+                  • Use the slider to quickly select your EU shoe size
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  • Or enter a size in any field to see instant conversions
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  • All values update automatically in real-time
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  • Note: Conversions are approximate and may vary by manufacturer
+                </Typography>
+              </Stack>
+            </Paper>
+          </Paper>
+        </Container>
+      </Box>
+    </ThemeProvider>
   )
 }
 
