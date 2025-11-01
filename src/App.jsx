@@ -78,11 +78,11 @@ function App() {
   }
 
   const sizeData = [
-    { label: 'EU', value: euSize, converter: (val) => setEuSize(parseFloat(val) || 0), color: '#1976d2', step: 0.5 },
-    { label: 'US', value: euToUS(euSize), converter: (val) => handleInputChange(val, usToEU), color: '#9c27b0', step: 0.5 },
-    { label: 'UK', value: euToUK(euSize), converter: (val) => handleInputChange(val, ukToEU), color: '#2e7d32', step: 0.5 },
-    { label: 'CM', value: euToCM(euSize), converter: (val) => handleInputChange(val, cmToEU), color: '#ed6c02', step: 0.1 },
-    { label: 'Inches', value: euToInches(euSize), converter: (val) => handleInputChange(val, inchesToEU), color: '#d32f2f', step: 0.01 },
+    { label: 'EU', value: euSize, converter: (val) => setEuSize(parseFloat(val) || 0), color: '#1976d2', step: 0.5, labelSuffix: 'Size' },
+    { label: 'US', value: euToUS(euSize), converter: (val) => handleInputChange(val, usToEU), color: '#9c27b0', step: 0.5, labelSuffix: 'Size' },
+    { label: 'UK', value: euToUK(euSize), converter: (val) => handleInputChange(val, ukToEU), color: '#2e7d32', step: 0.5, labelSuffix: 'Size' },
+    { label: 'CM', value: euToCM(euSize), converter: (val) => handleInputChange(val, cmToEU), color: '#ed6c02', step: 0.1, labelSuffix: 'Size' },
+    { label: 'Inches', value: euToInches(euSize), converter: (val) => handleInputChange(val, inchesToEU), color: '#d32f2f', step: 0.01, labelSuffix: '' },
   ]
 
   return (
@@ -213,7 +213,7 @@ function App() {
                         gutterBottom
                         sx={{ color: size.color, fontWeight: 700 }}
                       >
-                        {size.label} {size.label === 'CM' ? 'Size' : size.label === 'Inches' ? '' : 'Size'}
+                        {size.label} {size.labelSuffix}
                       </Typography>
                       <TextField
                         type="number"
