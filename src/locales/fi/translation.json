@@ -1,0 +1,16 @@
+{
+  "title": "Kengänkokomuunnin",
+  "subtitle": "Löydä täydellinen koko eri standardeista",
+  "inputLabel": "Syötä koko",
+  "selectType": "Valitse standardi",
+  "result": "Muunnettu koko",
+  "standards": {
+    "eu": "Eurooppa (EU)",
+    "us": "Yhdysvallat (US)",
+    "uk": "Iso-Britannia (UK)",
+    "cm": "Senttimetrit (CM)",
+    "in": "Tuumat (IN)"
+  },
+  "footer": "Mitat ovat arvioita. Kokeile kenkiä aina kun mahdollista.",
+  "toggleTheme": "Vaihda teema"
+}

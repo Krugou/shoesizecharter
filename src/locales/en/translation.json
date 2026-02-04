@@ -1,0 +1,16 @@
+{
+  "title": "Shoe Size Converter",
+  "subtitle": "Find your perfect fit across different standards",
+  "inputLabel": "Enter Size",
+  "selectType": "Select Standard",
+  "result": "Converted Size",
+  "standards": {
+    "eu": "European (EU)",
+    "us": "United States (US)",
+    "uk": "United Kingdom (UK)",
+    "cm": "Centimeters (CM)",
+    "in": "Inches (IN)"
+  },
+  "footer": "Measurements are approximate. Always try shoes on if possible.",
+  "toggleTheme": "Toggle Theme"
+}

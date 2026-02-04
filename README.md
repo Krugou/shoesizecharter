@@ -1,79 +1,86 @@
 # Shoe Size Converter
 
-A modern web application for converting shoe sizes between different country standards (EU, US, UK) and measurement units (CM, Inches).
+A modern, responsive, and easy-to-use shoe size converter application. Built with React, TypeScript, and Material UI, this tool allows users to instantly convert between EU, US, UK, CM, and Inches shoe sizes.
 
-![Shoe Size Converter](https://github.com/user-attachments/assets/06ccffbe-0fb1-4075-8a1d-27c8ddd7983c)
+![Shoe Size Converter Logo](public/logo.png)
 
 ## Features
 
-- 🔄 **Real-time conversion** between multiple shoe size standards
-- 🌍 **International support**: EU, US, UK sizes
-- 📏 **Measurement units**: Centimeters and Inches
-- 🎯 **Default EU size 50** as starting point
-- 💅 **Modern UI** built with Tailwind CSS
-- ⚡ **Fast and responsive** powered by Vite and React
+- **Real-time Conversion**: Instantly converts between multiple standards (EU, US, UK, CM, Inches).
+- **Dark Mode Support**: Comes with a sleek dark mode enabled by default, with a toggle for light mode.
+- **Internationalization (i18n)**: Fully localized in English and Finnish.
+- **Responsive Design**: Optimized for mobile, tablet, and desktop devices.
+- **Interactive UI**: Featuring smooth animations, sliders, and intuitive input fields.
+- **Offline Capable**: PWA-ready structure (Vite).
 
-## Live Demo
+## Tech Stack
 
-Visit the live application at: https://krugou.github.io/shoesizecharter/
-
-## Technologies Used
-
-- **Vite** - Next generation frontend tooling
-- **React** - JavaScript library for building user interfaces
-- **Tailwind CSS** - Utility-first CSS framework
-- **GitHub Actions** - CI/CD for automated deployment
+- **Framework**: [React](https://reactjs.org/) (v19) with [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **UI Component Library**: [Material UI (MUI)](https://mui.com/) v7
+- **Styling**: Emotion & CSS-in-JS
+- **Internationalization**: [i18next](https://www.i18next.com/) & [react-i18next](https://react.i18next.com/)
+- **Linting & Formatting**: [ESLint](https://eslint.org/) & [Prettier](https://prettier.io/)
+- **Git Hooks**: [Husky](https://typicode.github.io/husky/)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 20 or higher
-- npm
+- Node.js (v18 or higher recommended)
+- npm or yarn
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/Krugou/shoesizecharter.git
-cd shoesizecharter
-```
+
+   ```bash
+   git clone https://github.com/Krugou/shoesizecharter.git
+   cd shoesizecharter
+   ```
 
 2. Install dependencies:
-```bash
-npm install
-```
+
+   ```bash
+   npm install
+   ```
 
 3. Start the development server:
-```bash
-npm run dev
+
+   ```bash
+   npm run dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:5173`.
+
+## Scripts
+
+- `npm run dev`: Starts the development server.
+- `npm run build`: Builds the application for production.
+- `npm run preview`: Previews the production build locally.
+- `npm run lint`: Runs ESLint to check for code quality issues.
+- `npm run format`: Formats code using Prettier (if script added).
+
+## Project Structure
+
 ```
-
-4. Open your browser and navigate to `http://localhost:5173`
-
-### Build for Production
-
-```bash
-npm run build
+src/
+├── assets/          # Static assets
+├── locales/         # Translation files (en, fi)
+├── i18n.ts          # i18next configuration
+├── App.tsx          # Main application component
+├── main.tsx         # Entry point
+└── index.css        # Global styles
 ```
-
-The built files will be in the `dist` directory.
-
-## How to Use
-
-1. Enter a shoe size in any field (EU, US, UK, CM, or Inches)
-2. All other fields will automatically update with the converted values
-3. The default EU size is set to 50
-4. Values are approximate and may vary by manufacturer
-
-## Deployment
-
-This project is automatically deployed to GitHub Pages using GitHub Actions. Every push to the `main` branch triggers a new deployment.
-
-## License
-
-MIT
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+Distributed under the MIT License.
