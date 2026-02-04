@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   Box,
   Container,
@@ -16,6 +16,9 @@ import {
   Stack,
   IconButton,
   Tooltip,
+  ToggleButton,
+  ToggleButtonGroup,
+  Grow,
 } from '@mui/material';
 import {
   Straighten as StraightenIcon,
@@ -23,34 +26,32 @@ import {
   Brightness4 as DarkIcon,
   Brightness7 as LightIcon,
   Language as LanguageIcon,
+  Man as ManIcon,
+  Woman as WomanIcon,
+  ChildCare as ChildIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
+import { convert, Category } from './utils/converter';
+import { useLocalStorage } from './hooks/useLocalStorage';
 
-/**
- * Interface representing a shoe size conversion standard
- */
 interface SizeStandard {
+  id: string;
   label: string;
   value: number;
-  converter: (val: string) => void;
   color: string;
   step: number;
   labelSuffix: string;
 }
 
-/**
- * Main Application Component
- * Handles the state and rendering of the shoe size converter
- * @returns The rendered application
- */
 function App() {
   const { t, i18n } = useTranslation();
-  const [euSize, setEuSize] = useState<number>(42);
-  const [mode, setMode] = useState<'light' | 'dark'>('dark');
 
-  /**
-   * Theme configuration based on current mode
-   */
+  // Persist state
+  const [euSize, setEuSize] = useLocalStorage<number>('euSize', 42);
+  const [mode, setMode] = useLocalStorage<'light' | 'dark'>('theme', 'dark');
+  const [category, setCategory] = useLocalStorage<Category>('category', 'men');
+
   const theme = useMemo(
     () =>
       createTheme({
@@ -63,27 +64,29 @@ function App() {
             main: mode === 'dark' ? '#f48fb1' : '#dc004e',
           },
           background: {
-            default: mode === 'dark' ? '#121212' : '#f5f5f5',
+            default: mode === 'dark' ? '#0a0a0a' : '#f0f2f5',
             paper: mode === 'dark' ? '#1e1e1e' : '#ffffff',
           },
         },
         typography: {
-          fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-          h3: {
-            fontWeight: 700,
-          },
-          h6: {
-            fontWeight: 600,
-          },
+          fontFamily: '"Outfit", "Roboto", sans-serif',
+          h3: { fontWeight: 800 },
+          h6: { fontWeight: 600 },
         },
-        shape: {
-          borderRadius: 16,
-        },
+        shape: { borderRadius: 24 },
         components: {
           MuiPaper: {
             styleOverrides: {
               root: {
                 backgroundImage: 'none',
+              },
+            },
+          },
+          MuiButton: {
+            styleOverrides: {
+              root: {
+                textTransform: 'none',
+                fontWeight: 600,
               },
             },
           },
@@ -94,137 +97,76 @@ function App() {
 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  /**
-   * Toggles between light and dark theme modes
-   */
-  const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
-  };
+  const toggleTheme = () => setMode(mode === 'light' ? 'dark' : 'light');
 
-  /**
-   * Toggles language between English and Finnish
-   */
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'fi' : 'en';
     i18n.changeLanguage(newLang);
   };
 
-  /**
-   * Converts EU size to US size
-   * @param {number} eu - EU size
-   * @returns {number} US size
-   */
-  const euToUS = (eu: number): number => Math.round((eu * 0.8125 - 25.625) * 10) / 10;
-
-  /**
-   * Converts EU size to UK size
-   * @param {number} eu - EU size
-   * @returns {number} UK size
-   */
-  const euToUK = (eu: number): number => Math.round((eu * 0.8125 - 26.125) * 10) / 10;
-
-  /**
-   * Converts EU size to Centimeters
-   * @param {number} eu - EU size
-   * @returns {number} CM size
-   */
-  const euToCM = (eu: number): number => Math.round((eu / 1.5 - 1.5) * 10) / 10;
-
-  /**
-   * Converts EU size to Inches
-   * @param {number} eu - EU size
-   * @returns {number} Inches size
-   */
-  const euToInches = (eu: number): number => {
-    const cm = euToCM(eu);
-    return Math.round((cm / 2.54) * 100) / 100;
+  const handleCategoryChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newCategory: Category | null
+  ) => {
+    if (newCategory !== null) {
+      setCategory(newCategory);
+    }
   };
 
-  // Reverse conversions to EU
-
-  /**
-   * Converts US size to EU size
-   * @param {string} us - US size
-   * @returns {number} EU size
-   */
-  const usToEU = (us: string): number => Math.round(((parseFloat(us) + 25.625) / 0.8125) * 10) / 10;
-
-  /**
-   * Converts UK size to EU size
-   * @param {string} uk - UK size
-   * @returns {number} EU size
-   */
-  const ukToEU = (uk: string): number => Math.round(((parseFloat(uk) + 26.125) / 0.8125) * 10) / 10;
-
-  /**
-   * Converts CM size to EU size
-   * @param {string} cm - CM size
-   * @returns {number} EU size
-   */
-  const cmToEU = (cm: string): number => Math.round((parseFloat(cm) + 1.5) * 1.5 * 10) / 10;
-
-  /**
-   * Converts Inches size to EU size
-   * @param {string} inches - Inches size
-   * @returns {number} EU size
-   */
-  const inchesToEU = (inches: string): number => {
-    const cm = parseFloat(inches) * 2.54;
-    return cmToEU(cm.toString());
+  // Safe wrapper for conversion
+  const getConvertedValue = (to: string) => {
+    return convert(euSize, 'eu', to, category);
   };
 
-  /**
-   * Handles input changes for any size field
-   * @param {string} value - The input value
-   * @param {(val: string) => number} converter - The conversion function to EU size
-   */
-  const handleInputChange = (value: string, converter: (val: string) => number) => {
+  const handleInputChange = (value: string, from: string) => {
     if (value === '' || value === null) return;
     const numValue = parseFloat(value);
     if (!isNaN(numValue) && numValue > 0) {
-      setEuSize(converter(value));
+      // Convert input to EU first as base
+      const euVal = convert(numValue, from, 'eu', category);
+      setEuSize(Math.round(euVal * 100) / 100);
     }
   };
 
   const sizeData: SizeStandard[] = [
     {
+      id: 'eu',
       label: t('standards.eu'),
       value: euSize,
-      converter: (val: string) => setEuSize(parseFloat(val) || 0),
       color: mode === 'dark' ? '#90caf9' : '#1976d2',
       step: 0.5,
       labelSuffix: '',
     },
     {
+      id: 'us',
       label: t('standards.us'),
-      value: euToUS(euSize),
-      converter: (val: string) => handleInputChange(val, usToEU),
+      value: getConvertedValue('us'),
       color: mode === 'dark' ? '#ce93d8' : '#9c27b0',
       step: 0.5,
       labelSuffix: '',
     },
     {
+      id: 'uk',
       label: t('standards.uk'),
-      value: euToUK(euSize),
-      converter: (val: string) => handleInputChange(val, ukToEU),
+      value: getConvertedValue('uk'),
       color: mode === 'dark' ? '#a5d6a7' : '#2e7d32',
       step: 0.5,
       labelSuffix: '',
     },
     {
+      id: 'cm',
       label: t('standards.cm'),
-      value: euToCM(euSize),
-      converter: (val: string) => handleInputChange(val, cmToEU),
+      value: getConvertedValue('cm'),
       color: mode === 'dark' ? '#ffcc80' : '#ed6c02',
       step: 0.1,
       labelSuffix: '',
     },
     {
+      id: 'in',
       label: t('standards.in'),
-      value: euToInches(euSize),
-      converter: (val: string) => handleInputChange(val, inchesToEU),
+      value: getConvertedValue('in'),
       color: mode === 'dark' ? '#ef9a9a' : '#d32f2f',
-      step: 0.01,
+      step: 0.1,
       labelSuffix: '',
     },
   ];
@@ -237,214 +179,230 @@ function App() {
           minHeight: '100vh',
           background:
             mode === 'dark'
-              ? 'linear-gradient(135deg, #1a237e 0%, #311b92 100%)'
-              : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          py: { xs: 4, sm: 6, md: 8 },
-          px: { xs: 2, sm: 3 },
+              ? 'radial-gradient(circle at top right, #311b92 0%, #0a0a0a 60%)'
+              : 'radial-gradient(circle at top right, #e3f2fd 0%, #f0f2f5 60%)',
+          py: { xs: 4, md: 8 },
+          px: 2,
           transition: 'background 0.5s ease',
+          overflowX: 'hidden',
         }}
       >
-        <Container maxWidth="lg">
-          <Paper
-            elevation={12}
-            sx={{
-              p: { xs: 3, sm: 4, md: 6 },
-              background: mode === 'dark' ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.98)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: 4,
-            }}
-          >
-            {/* Header */}
-            <Box sx={{ position: 'relative', mb: 4 }}>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="center"
-                spacing={2}
-                sx={{ mb: 1 }}
-              >
-                <StraightenIcon sx={{ fontSize: { xs: 36, sm: 48 }, color: 'primary.main' }} />
-                <Typography
-                  variant={isMobile ? 'h4' : 'h3'}
-                  component="h1"
-                  color="primary"
-                  align="center"
-                  sx={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-                >
-                  {t('title')}
-                </Typography>
-              </Stack>
-              <Box sx={{ position: 'absolute', right: 0, top: 0, display: 'flex', gap: 1 }}>
-                <Tooltip title={t('toggleTheme')}>
-                  <IconButton onClick={toggleTheme} color="default">
-                    {mode === 'dark' ? <LightIcon /> : <DarkIcon />}
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Switch Language">
-                  <IconButton onClick={toggleLanguage} color="primary">
-                    <LanguageIcon />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Box>
-
-            <Typography
-              variant="h6"
-              color="text.secondary"
-              align="center"
-              sx={{ mb: 4, fontWeight: 400 }}
-            >
-              {t('subtitle')}
-            </Typography>
-
-            {/* Slider Section */}
+        <Container maxWidth="md">
+          <Grow in timeout={800}>
             <Paper
-              elevation={4}
+              elevation={24}
               sx={{
-                p: { xs: 3, sm: 4 },
-                mb: 6,
-                background:
+                p: { xs: 3, md: 6 },
+                background: mode === 'dark' ? 'rgba(30,30,30,0.6)' : 'rgba(255,255,255,0.8)',
+                backdropFilter: 'blur(20px)',
+                border:
                   mode === 'dark'
-                    ? 'linear-gradient(135deg, #283593 0%, #4527a0 100%)'
-                    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                borderRadius: 3,
+                    ? '1px solid rgba(255,255,255,0.1)'
+                    : '1px solid rgba(255,255,255,0.5)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
               }}
             >
-              <Typography variant="h6" gutterBottom align="center" sx={{ color: 'white', mb: 3 }}>
-                {t('standards.eu')}: {euSize}
-              </Typography>
-              <Box sx={{ px: { xs: 1, sm: 3 } }}>
-                <Slider
-                  value={euSize}
-                  onChange={(_, newValue) => setEuSize(newValue as number)}
-                  min={35}
-                  max={50}
-                  step={0.5}
-                  marks={[
-                    { value: 35, label: '35' },
-                    { value: 40, label: '40' },
-                    { value: 45, label: '45' },
-                    { value: 50, label: '50' },
-                  ]}
-                  valueLabelDisplay="on"
-                  sx={{
-                    color: 'white',
-                    height: 8,
-                    '& .MuiSlider-markLabel': {
-                      color: 'rgba(255,255,255,0.8)',
-                      fontSize: '1rem',
-                    },
-                    '& .MuiSlider-thumb': {
-                      width: 28,
-                      height: 28,
-                      backgroundColor: 'white',
-                      border: '4px solid rgba(255,255,255,0.2)',
-                      '&:hover, &.Mui-focusVisible': {
-                        boxShadow: '0 0 0 8px rgba(255, 255, 255, 0.16)',
-                      },
-                    },
-                    '& .MuiSlider-rail': {
-                      opacity: 0.3,
-                      backgroundColor: 'white',
-                    },
-                    '& .MuiSlider-valueLabel': {
-                      backgroundColor: 'rgba(0,0,0,0.6)',
-                    },
-                  }}
-                />
-              </Box>
-            </Paper>
+              {/* Top Bar */}
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <StraightenIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+                  {!isMobile && (
+                    <Typography
+                      variant="h5"
+                      fontWeight="800"
+                      sx={{
+                        background: '-webkit-linear-gradient(45deg, #90caf9, #f48fb1)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      }}
+                    >
+                      ShoeSize
+                    </Typography>
+                  )}
+                </Stack>
 
-            {/* Size Cards Grid */}
-            <Grid container spacing={{ xs: 2, sm: 3 }}>
-              {sizeData.map((size) => (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={size.label}>
-                  <Card
-                    elevation={4}
+                <Stack direction="row" spacing={1}>
+                  <Tooltip title={t('toggleTheme')}>
+                    <IconButton onClick={toggleTheme}>
+                      {mode === 'dark' ? <LightIcon /> : <DarkIcon />}
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Language">
+                    <IconButton onClick={toggleLanguage}>
+                      <LanguageIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
+              </Box>
+
+              {/* Title Header */}
+              <Box textAlign="center">
+                <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+                  <Typography
+                    variant={isMobile ? 'h4' : 'h2'}
+                    gutterBottom
+                    sx={{ fontWeight: 900, letterSpacing: '-0.02em' }}
+                  >
+                    {t('title')}
+                  </Typography>
+                  <Typography variant="h6" color="text.secondary" fontWeight="400">
+                    {t('subtitle')}
+                  </Typography>
+                </motion.div>
+              </Box>
+
+              {/* Category Selector */}
+              <Box display="flex" justifyContent="center">
+                <ToggleButtonGroup
+                  value={category}
+                  exclusive
+                  onChange={handleCategoryChange}
+                  aria-label="size category"
+                  size="large"
+                  sx={{
+                    background: mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                    borderRadius: 4,
+                    p: 0.5,
+                  }}
+                >
+                  <ToggleButton value="men" sx={{ borderRadius: 3, px: 3, py: 1.5 }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <ManIcon /> <Typography fontWeight="600">{t('categories.men')}</Typography>
+                    </Stack>
+                  </ToggleButton>
+                  <ToggleButton value="women" sx={{ borderRadius: 3, px: 3, py: 1.5 }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <WomanIcon />{' '}
+                      <Typography fontWeight="600">{t('categories.women')}</Typography>
+                    </Stack>
+                  </ToggleButton>
+                  <ToggleButton value="kids" sx={{ borderRadius: 3, px: 3, py: 1.5 }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <ChildIcon /> <Typography fontWeight="600">{t('categories.kids')}</Typography>
+                    </Stack>
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+
+              {/* Slider */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 4,
+                  borderRadius: 4,
+                  background:
+                    'linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(220, 0, 78, 0.1) 100%)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              >
+                <Typography variant="h6" align="center" gutterBottom>
+                  EU {t('standards.eu')}:{' '}
+                  <span style={{ fontSize: '1.5em', fontWeight: 800 }}>{euSize}</span>
+                </Typography>
+                <Box px={{ xs: 1, md: 4 }}>
+                  <Slider
+                    value={euSize}
+                    onChange={(_, v) => setEuSize(v as number)}
+                    min={15}
+                    max={50}
+                    step={0.5}
+                    valueLabelDisplay="auto"
                     sx={{
-                      height: '100%',
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      '&:hover': {
-                        transform: 'translateY(-8px)',
-                        boxShadow: 12,
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: size.color,
+                      height: 12,
+                      '& .MuiSlider-thumb': {
+                        width: 32,
+                        height: 32,
+                        backgroundColor: '#fff',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                        '&:hover, &.Mui-focusVisible': {
+                          boxShadow: '0 0 0 10px rgba(255, 255, 255, 0.2)',
                         },
                       },
-                      background:
-                        mode === 'dark'
-                          ? `linear-gradient(135deg, ${size.color}15 0%, ${size.color}05 100%)`
-                          : `linear-gradient(135deg, ${size.color}10 0%, ${size.color}05 100%)`,
-                      borderTop: `4px solid ${size.color}`,
+                      '& .MuiSlider-track': { border: 'none' },
+                      '& .MuiSlider-rail': { opacity: 0.3 },
                     }}
-                  >
-                    <CardContent>
-                      <Typography
-                        variant="subtitle1"
-                        component="div"
-                        gutterBottom
-                        sx={{ color: size.color, fontWeight: 700, mb: 2 }}
-                      >
-                        {size.label} {size.labelSuffix}
-                      </Typography>
-                      <TextField
-                        type="number"
-                        fullWidth
-                        value={size.value}
-                        onChange={(e) => size.converter(e.target.value)}
-                        inputProps={{
-                          step: size.step,
-                          style: {
-                            fontSize: isMobile ? '1.5rem' : '2rem',
-                            fontWeight: 700,
-                            padding: '12px',
-                          },
-                        }}
-                        variant="outlined"
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            backgroundColor:
-                              mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)',
-                            '& fieldset': {
-                              borderColor: `${size.color}40`,
-                              borderWidth: 2,
-                              transition: 'border-color 0.3s',
-                            },
-                            '&:hover fieldset': {
-                              borderColor: size.color,
-                            },
-                            '&.Mui-focused fieldset': {
-                              borderColor: size.color,
-                            },
-                          },
-                        }}
-                      />
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
+                  />
+                </Box>
+              </Paper>
 
-            {/* Info Section */}
-            <Paper
-              elevation={0}
-              variant="outlined"
-              sx={{
-                mt: 6,
-                p: { xs: 2, sm: 3 },
-                backgroundColor: mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-                borderColor: mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
-              }}
-            >
-              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-                <InfoIcon color="primary" />
-                <Typography variant="h6" color="primary">
-                  {t('footer')}
-                </Typography>
-              </Stack>
+              {/* Grid of Cards */}
+              <Grid container spacing={2}>
+                <AnimatePresence>
+                  {sizeData.map((item, index) => (
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      md={4}
+                      key={item.id}
+                      component={motion.div}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Card
+                        elevation={0}
+                        sx={{
+                          height: '100%',
+                          borderRadius: 4,
+                          bgcolor: mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                          border: '1px solid transparent',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            bgcolor:
+                              mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                            borderColor: item.color,
+                            transform: 'translateY(-4px)',
+                          },
+                        }}
+                      >
+                        <CardContent>
+                          <Typography
+                            variant="subtitle2"
+                            color="text.secondary"
+                            fontWeight="700"
+                            sx={{
+                              color: item.color,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.1em',
+                            }}
+                            gutterBottom
+                          >
+                            {item.label}
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            variant="standard"
+                            value={item.value}
+                            onChange={(e) => handleInputChange(e.target.value, item.id)}
+                            InputProps={{
+                              disableUnderline: true,
+                              style: {
+                                fontSize: '2rem',
+                                fontWeight: 800,
+                                color: mode === 'dark' ? '#fff' : '#000',
+                              },
+                            }}
+                          />
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </AnimatePresence>
+              </Grid>
+
+              {/* Footer */}
+              <Box textAlign="center" mt={2} color="text.secondary">
+                <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
+                  <InfoIcon fontSize="small" />
+                  <Typography variant="body2">{t('footer')}</Typography>
+                </Stack>
+              </Box>
             </Paper>
-          </Paper>
+          </Grow>
         </Container>
       </Box>
     </ThemeProvider>

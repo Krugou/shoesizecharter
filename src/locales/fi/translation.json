@@ -11,6 +11,11 @@
     "cm": "Senttimetrit (CM)",
     "in": "Tuumat (IN)"
   },
+  "categories": {
+    "men": "Miehet",
+    "women": "Naiset",
+    "kids": "Lapset"
+  },
   "footer": "Mitat ovat arvioita. Kokeile kenkiä aina kun mahdollista.",
   "toggleTheme": "Vaihda teema"
 }

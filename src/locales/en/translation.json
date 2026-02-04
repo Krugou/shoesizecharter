@@ -11,6 +11,11 @@
     "cm": "Centimeters (CM)",
     "in": "Inches (IN)"
   },
-  "footer": "Measurements are approximate. Always try shoes on if possible.",
+  "categories": {
+    "men": "Men",
+    "women": "Women",
+    "kids": "Kids"
+  },
+  "footer": "Measurements are approximate. always try shoes on if possible.",
   "toggleTheme": "Toggle Theme"
 }
